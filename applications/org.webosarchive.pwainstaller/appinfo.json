@@ -1,0 +1,11 @@
+{
+    "id": "org.webosarchive.pwainstaller",
+    "version": "1.0.0",
+    "vendor": "WebOS Archive",
+    "type": "web",
+    "main": "index.html",
+    "title": "PWA Installer",
+    "icon": "icon.png",
+    "splashicon": "icon-256x256.png",
+    "uiRevision": 2
+}

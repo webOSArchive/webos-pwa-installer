@@ -1,0 +1,10 @@
+{
+	"app": "org.webosarchive.pwainstaller",
+	"id": "org.webosarchive.pwainstaller",
+	"loc_name": "PWA Installer",
+	"package_format_version": 2,
+	"services": ["org.webosarchive.pwainstaller.fetchsvc.service"],
+	"vendor": "WebOS Archive",
+	"vendorurl": "www.webosarchive.org",
+	"version": "1.0.0"
+}

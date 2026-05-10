@@ -1,0 +1,6 @@
+[
+	{"library": {"name": "foundations", "version": "1.0"}},
+	{"source": "Requirements.js"},
+	{"source": "FetchPwaAssistant.js"},
+	{"source": "WriteBinaryAssistant.js"}
+]

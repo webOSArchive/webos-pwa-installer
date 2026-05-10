@@ -1,0 +1,21 @@
+{
+	"id": "org.webosarchive.pwainstaller.fetchsvc.service",
+	"description": "PWA metadata fetch and icon storage service",
+	"engine": "node",
+	"services": [{
+		"name": "org.webosarchive.pwainstaller.fetchsvc.service",
+		"description": "Fetches PWA metadata and writes icons to device storage",
+		"commands": [
+			{
+				"name": "fetchpwa",
+				"assistant": "FetchPwaAssistant",
+				"public": true
+			},
+			{
+				"name": "writebinary",
+				"assistant": "WriteBinaryAssistant",
+				"public": true
+			}
+		]
+	}]
+}

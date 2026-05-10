@@ -1,0 +1,121 @@
+/* ── Layout ────────────────────────────────────────────────────────────── */
+
+.box-center {
+	width: 500px;
+	margin: 23px auto 0;
+}
+.box-center.enyo-scroller-scrollee {
+	padding-bottom: 30px;
+}
+
+/* ── Header ────────────────────────────────────────────────────────────── */
+
+.app-header img {
+	display: block;
+	margin-right: 10px;
+}
+
+.app-header-shadow,
+.app-footer-shadow {
+	position: absolute;
+	z-index: 100;
+	width: 100%;
+	pointer-events: none;
+}
+
+.app-header-shadow {
+	top: 54px;
+	height: 3px;
+	background: transparent url('../images/light_chrome_drop_shadow_header.png') bottom repeat-x;
+}
+
+.app-footer-shadow {
+	bottom: 0;
+	height: 57px;
+	background: transparent url('../images/light_chrome_drop_shadow_footer.png') top repeat-x;
+}
+
+/* ── Groups ────────────────────────────────────────────────────────────── */
+
+.app-group + .app-group {
+	margin-top: 15px;
+}
+
+/* ── Status area ───────────────────────────────────────────────────────── */
+
+.app-status-area {
+	min-height: 40px;
+	margin: 8px 5px;
+}
+
+.app-status-area .enyo-spinner {
+	margin-right: 8px;
+}
+
+/* ── Body / footnote text ──────────────────────────────────────────────── */
+
+.app-body-text {
+	font-size: 16px;
+	color: #666;
+	margin: 0 5px;
+}
+
+.enyo-group + .app-body-text {
+	margin-top: -7px;
+}
+
+/* ── Preview icon ──────────────────────────────────────────────────────── */
+
+.app-icon-preview {
+	display: block;
+	width: 64px;
+	height: 64px;
+	margin-right: 12px;
+	-webkit-border-radius: 10px;
+}
+
+/* ── Name input spacing ────────────────────────────────────────────────── */
+
+.app-name-input {
+	margin-left: 4px;
+}
+
+/* ── Fetch button ──────────────────────────────────────────────────────── */
+
+.app-go-btn {
+	margin-left: 8px;
+	white-space: nowrap;
+}
+
+/* ── Install button ────────────────────────────────────────────────────── */
+
+.app-install-btn {
+	width: 300px;
+}
+
+/* ── Dialogs ───────────────────────────────────────────────────────────── */
+
+.app-dialog-message {
+	margin: 20px;
+	text-align: center;
+	font-size: 16px;
+}
+
+.app-about-title {
+	font-size: 22px;
+	font-weight: bold;
+	text-align: center;
+	margin: 10px 0 4px;
+}
+
+.app-about-subtitle {
+	font-size: 15px;
+	color: #666;
+	text-align: center;
+	margin-bottom: 2px;
+}
+
+.app-about-body {
+	text-align: center;
+	margin: 12px 20px;
+}
