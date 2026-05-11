@@ -68,3 +68,7 @@ The two browsers require different `params` formats when creating a launch point
 | QupZilla (`com.nizovn.qupzilla`) | `[url]` |
 
 QupZilla must be installed separately and is not included. Visits [docs.webosarchive.org](http://docs.webosarchive.org) to learn more about browsers for webOS.
+
+## Icon Credit
+
+Icon found on pngtree.com, original artist not listed.
