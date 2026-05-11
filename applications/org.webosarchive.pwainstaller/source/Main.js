@@ -14,6 +14,10 @@ enyo.kind({
 	fetchedIconPath: null,
 
 	components: [
+		{ kind: "AppMenu", components: [
+			{ kind: "EditMenu" },
+			{ caption: $L("About"), onclick: "showAbout" }
+		]},
 		// ── Header ────────────────────────────────────────────────
 		{kind: "Toolbar", className: "enyo-toolbar-light app-header", pack: "center", components: [
 			{kind: "Image", src: "images/header-icon-48x48.png", className: "app-header-icon"},
@@ -27,18 +31,16 @@ enyo.kind({
 
 				// URL input
 				{kind: "RowGroup", className: "app-group", caption: $L("WEBSITE"), components: [
-					{kind: "Item", tapHighlight: false, layoutKind: "HFlexLayout", align: "center", components: [
-						{kind: "Input", name: "urlInput", flex: 1,
+					{kind: "Input", name: "urlInput", flex: 1,
 							hint: $L("Enter website URL..."),
 							inputType: "url",
 							autocorrect: false,
 							spellcheck: false,
 							autoCapitalize: "lowercase",
 							onkeyup: "urlKeyUp"},
-						{kind: "Button", name: "goButton", caption: $L("Fetch"),
-							className: "enyo-button-dark app-go-btn",
-							onclick: "fetchClicked"}
-					]}
+					{kind: "Button", name: "goButton", caption: $L("Fetch"),
+						className: "enyo-button",
+						onclick: "fetchClicked"}
 				]},
 
 				// Status / spinner
@@ -92,11 +94,6 @@ enyo.kind({
 				active: false}
 		]},
 
-		// ── App menu ───────────────────────────────────────────────
-		{kind: "AppMenu", name: "appMenu", components: [
-			{caption: $L("About PWA Installer"), onclick: "showAbout"}
-		]},
-
 		// ── Services ───────────────────────────────────────────────
 		{kind: "PalmService", name: "fetchPwa",
 			service: "palm://org.webosarchive.pwainstaller.fetchsvc.service/",
@@ -126,17 +123,16 @@ enyo.kind({
 		]},
 
 		// ── About dialog ───────────────────────────────────────────
-		{name: "aboutDialog", kind: "Dialog", lazy: false, components: [
-			{content: "PWA Installer", className: "app-about-title"},
-			{content: "by WebOS Archive",  className: "app-about-subtitle"},
-			{content: "Install web apps as Home Screen shortcuts on webOS.",
-				className: "app-body-text app-about-body"},
-			{layoutKind: "HFlexLayout", pack: "center", components: [
-				{kind: "Button", caption: $L("OK"),
-					className: "enyo-button-dark",
-					onclick: "closeAboutDialog"}
-			]}
-		]}
+		{ kind: "Dialog", name: "aboutDialog", lazy: false, components: [
+			{ name: "aboutTitle",
+				style: "font-size: 20px; font-weight: bold; text-align: center; padding-bottom: 2px;" },
+			{ name: "aboutVersion",
+				style: "text-align: center; color: #666; padding-bottom: 4px;" },
+			{ name: "aboutCopyright",
+				style: "text-align: center; color: #666;" },
+			{ kind: "Button", caption: $L("OK"), onclick: "closeAbout",
+				className: "enyo-button-dark", style: "margin-top: 16px; width: 100%;" }
+		]},
 	],
 
 	// ── Lifecycle ──────────────────────────────────────────────────────────
@@ -302,8 +298,16 @@ enyo.kind({
 
 	// ── Dialogs ────────────────────────────────────────────────────────────
 
-	showAbout: function() {
-		this.$.aboutDialog.openAtCenter();
+	showAbout: function () {
+		var info = enyo.fetchAppInfo();
+		this.$.aboutTitle.setContent(info.title || "WebCal Sync");
+		this.$.aboutVersion.setContent("Version " + (info.version || ""));
+		this.$.aboutCopyright.setContent("Copyright " + (info.copyrightYear || "2026") + ", " + (info.vendor || "webOS Archive"));
+		this.$.aboutDialog.open();
+	},
+
+	closeAbout: function () {
+		this.$.aboutDialog.close();
 	},
 
 	closeAboutDialog: function() {
