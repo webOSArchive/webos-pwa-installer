@@ -67,10 +67,4 @@ The two browsers require different `params` formats when creating a launch point
 | webOS Browser (`com.palm.app.browser`) | `{target: url}` |
 | QupZilla (`com.nizovn.qupzilla`) | `[url]` |
 
-QupZilla must be installed separately and is not included.
-
-## TODO
-
-- UI clean-up
-- New icon
-- Icon picker (if no match found)
+QupZilla must be installed separately and is not included. Visits [docs.webosarchive.org](http://docs.webosarchive.org) to learn more about browsers for webOS.

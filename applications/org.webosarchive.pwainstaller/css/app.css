@@ -80,6 +80,15 @@
 	margin-left: 4px;
 }
 
+/* ── Change icon link row ──────────────────────────────────────────────── */
+
+.app-change-icon-label {
+	font-size: 14px;
+	color: #4a90e2;
+	padding: 4px 0;
+}
+
+
 /* ── Fetch button ──────────────────────────────────────────────────────── */
 
 .app-go-btn {

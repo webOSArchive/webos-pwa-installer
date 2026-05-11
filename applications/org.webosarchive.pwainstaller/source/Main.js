@@ -58,12 +58,19 @@ enyo.kind({
 					{kind: "Item", tapHighlight: false, layoutKind: "HFlexLayout", align: "center", components: [
 						{name: "iconPreview", kind: "Image",
 							src: "images/icon-default.png",
-							className: "app-icon-preview"},
+							className: "app-icon-preview",
+							onError: "onIconPreviewError"},
 						{kind: "Input", name: "nameInput", flex: 1,
 							hint: $L("Shortcut name"),
 							autocorrect: false,
 							spellcheck: false,
 							className: "app-name-input"}
+					]},
+					// Tapping "Change icon" opens the file picker directly
+					{kind: "Item", tapHighlight: true, layoutKind: "HFlexLayout", align: "center",
+							onclick: "browseForIcon", components: [
+						{kind: "Control", flex: 1, content: $L("Change icon..."),
+							className: "app-change-icon-label"}
 					]}
 				]},
 
@@ -77,8 +84,9 @@ enyo.kind({
 							{caption: $L("QupZilla 2.3 or higher"), value: "com.nizovn.qupzilla"}
 						]}
 				]},
-				{content: $L("QupZilla must be installed separately."),
-					className: "app-body-text"}
+				{name: "qupzillaNote", showing: false,
+					content: $L("QupZilla must be installed separately."),
+					className: "app-body-text", style: "text-align: center;"}
 			]}
 		]},
 
@@ -100,6 +108,10 @@ enyo.kind({
 			method: "fetchpwa",
 			onSuccess: "onFetchSuccess",
 			onFailure: "onFetchFailure"},
+
+		{kind: "FilePicker", name: "filePicker",
+			fileType: ["image"],
+			onPickFile: "onPickFile"},
 
 		{kind: "PalmService", name: "createLaunchPoint",
 			service: enyo.palmServices.application,
@@ -140,7 +152,9 @@ enyo.kind({
 	create: function() {
 		this.inherited(arguments);
 		this.settings = this.loadSettings();
+		this.settings.browserId = "com.palm.app.browser";
 		this.$.browserSelector.setValue(this.settings.browserId);
+		this.$.qupzillaNote.setShowing(false);
 		this.$.getAppPath.call({appId: "org.webosarchive.pwainstaller"});
 	},
 
@@ -166,6 +180,25 @@ enyo.kind({
 		if (inEvent.keyCode === 13) {
 			this.fetchClicked();
 		}
+	},
+
+	// ── Icon override flow ─────────────────────────────────────────────────────
+
+	browseForIcon: function() {
+		this.$.filePicker.pickFile();
+	},
+
+	onPickFile: function(inSender, inFiles) {
+		var chosen = inFiles && inFiles[0];
+		if (!chosen) return;
+		this.fetchedIconPath = chosen.fullPath;
+		// Try a file:// URL for the preview; onIconPreviewError falls back if blocked.
+		this.$.iconPreview.setSrc('file://' + chosen.fullPath);
+		this.$.statusText.setContent($L("Custom icon selected. Tap Install to continue."));
+	},
+
+	onIconPreviewError: function() {
+		this.$.iconPreview.setSrc("images/icon-default.png");
 	},
 
 	// ── Fetch flow ─────────────────────────────────────────────────────────
@@ -199,8 +232,9 @@ enyo.kind({
 		this.$.previewGroup.show();
 
 		if (this.fetchedIconPath) {
-			// Preview from remote URL — avoids app sandbox restrictions on local paths
-			this.$.iconPreview.setSrc(inResponse.iconUrl || this.fetchedIconPath);
+			// Prefer the embedded data URI — avoids WebKit rejecting remote URLs due
+			// to TLS cert mismatches. Fall back to remote URL for large icons.
+			this.$.iconPreview.setSrc(inResponse.iconDataUrl || inResponse.iconUrl || this.fetchedIconPath);
 			this.$.statusText.setContent($L("Review the shortcut details and tap Install."));
 		} else {
 			this.$.iconPreview.setSrc("images/icon-default.png");
@@ -282,6 +316,7 @@ enyo.kind({
 	browserChanged: function(inSender, inNewValue) {
 		this.settings.browserId = inNewValue;
 		this.saveSettings();
+		this.$.qupzillaNote.setShowing(inNewValue === "com.nizovn.qupzilla");
 	},
 
 	loadSettings: function() {

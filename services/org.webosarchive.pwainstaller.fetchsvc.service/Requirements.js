@@ -13,6 +13,20 @@ function setResult(future, value) {
 	future.result = value;
 }
 
+// ── Icon data URI builder ──────────────────────────────────────────────────
+
+// Returns a data URI string for imgData (a Buffer), or null if the data is
+// too large for safe Luna IPC transport (>32 KB binary ≈ 43 KB base64).
+function buildIconDataUrl(imgData) {
+	if (!imgData || imgData.length >= 32768) return null;
+	try {
+		var mime = 'image/png';
+		if (imgData[0] === 0xff && imgData[1] === 0xd8) mime = 'image/jpeg';
+		else if (imgData[0] === 0x47 && imgData[1] === 0x49) mime = 'image/gif';
+		return 'data:' + mime + ';base64,' + imgData.toString('base64');
+	} catch(e) { return null; }
+}
+
 // ── URL helpers ────────────────────────────────────────────────────────────
 
 function extractOrigin(url) {
@@ -44,6 +58,24 @@ function resolveUrl(href, origin, baseDir) {
 }
 
 // ── HTML extraction helpers ────────────────────────────────────────────────
+
+// Returns the href of the first <link rel="icon"> that explicitly references
+// a PNG (by type="image/png" or a .png href). Skips .ico and .svg entries.
+function extractPngFaviconHref(html) {
+	var tagRe = /<link[^>]+>/gi;
+	var m;
+	while ((m = tagRe.exec(html)) !== null) {
+		var tag = m[0];
+		if (!/\brel\s*=\s*["'](?:shortcut )?icon["']/i.test(tag)) continue;
+		var hrefM = tag.match(/\bhref\s*=\s*["']([^"']{1,500})["']/i);
+		if (!hrefM) continue;
+		var href = hrefM[1].trim();
+		var typeM = tag.match(/\btype\s*=\s*["']([^"']+)["']/i);
+		var type  = typeM ? typeM[1].toLowerCase() : '';
+		if (type === 'image/png' || /\.png($|\?)/i.test(href)) return href;
+	}
+	return null;
+}
 
 function extractTag(html, re) {
 	var m = html.match(re);
@@ -166,13 +198,14 @@ function curlDownloadImage(url, outFile, cb) {
 		+ ' -o "' + outFile + '"'
 		+ ' "' + safeUrl + '"';
 	child_process.exec(cmd, {timeout: 25000}, function(error) {
-		if (error) { cb(1); return; }
-		// Re-create the file via fs so it gets default (0644) permissions
+		if (error) { cb(1, null); return; }
+		// Re-create the file via fs so it gets default (0644) permissions.
+		// Pass the data buffer back so callers can build a data URI for preview.
 		fs.readFile(outFile, function(readErr, data) {
-			if (readErr) { cb(1); return; }
+			if (readErr) { cb(1, null); return; }
 			try { fs.unlinkSync(outFile); } catch(e) {}
 			fs.writeFile(outFile, data, function(writeErr) {
-				cb(writeErr ? 1 : 0);
+				cb(writeErr ? 1 : 0, writeErr ? null : data);
 			});
 		});
 	});

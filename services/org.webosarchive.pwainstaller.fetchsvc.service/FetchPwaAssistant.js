@@ -28,14 +28,19 @@ FetchPwaAssistant.prototype.run = function(future) {
 		}
 
 		var iconLocalPath = storageDir + 'icon_' + timestamp + '.png';
-		curlDownloadImage(candidates[idx].url, iconLocalPath, function(dlCode) {
+		curlDownloadImage(candidates[idx].url, iconLocalPath, function(dlCode, imgData) {
 			if (dlCode === 0) {
 				try {
 					var stat = fs.statSync(iconLocalPath);
 					if (stat.size >= 100) {
+						// Build a data URI so the app can preview without a network request.
+						// This avoids WebKit rejecting remote image loads due to TLS cert mismatches.
+						// Limit to 32 KB binary (≈43 KB base64) to stay within Luna IPC limits.
+						var iconDataUrl = buildIconDataUrl(imgData);
 						setResult(future, {
 							title:         appName,
 							iconUrl:       candidates[idx].url,
+							iconDataUrl:   iconDataUrl,
 							iconLocalPath: iconLocalPath,
 							needsResize:   candidates[idx].needsResize
 						});
@@ -74,14 +79,16 @@ FetchPwaAssistant.prototype.run = function(future) {
 		            extractMeta(html, 'og:title')                            ||
 		            origin.replace(/^https?:\/\//, '');
 
-		var manifestHref  = extractLinkHref(html, 'manifest');
-		var appleHref     = extractLinkHref(html, 'apple-touch-icon') ||
-		                    extractLinkHref(html, 'apple-touch-icon-precomposed');
-		var ogImageUrl    = extractMeta(html, 'og:image');
+		var manifestHref    = extractLinkHref(html, 'manifest');
+		var appleHref       = extractLinkHref(html, 'apple-touch-icon') ||
+		                      extractLinkHref(html, 'apple-touch-icon-precomposed');
+		var pngFaviconHref  = extractPngFaviconHref(html);
+		var ogImageUrl      = extractMeta(html, 'og:image');
 
-		var manifestUrl   = resolveUrl(manifestHref, origin, baseDir);
-		var appleIconUrl  = resolveUrl(appleHref,    origin, baseDir);
-		var ogImageResUrl = resolveUrl(ogImageUrl,   origin, baseDir);
+		var manifestUrl     = resolveUrl(manifestHref,   origin, baseDir);
+		var appleIconUrl    = resolveUrl(appleHref,      origin, baseDir);
+		var pngFaviconUrl   = resolveUrl(pngFaviconHref, origin, baseDir);
+		var ogImageResUrl   = resolveUrl(ogImageUrl,     origin, baseDir);
 
 		// ── Step 3: Fetch manifest (if found), then try icons in order ────
 
@@ -105,18 +112,20 @@ FetchPwaAssistant.prototype.run = function(future) {
 					iconInfo = pickBestIcon(manifest.icons, mOrigin, mBaseDir);
 				}
 
-				// Build candidate list: manifest icon → apple-touch-icon → og:image
+				// Build candidate list: manifest icon → apple-touch-icon → PNG favicon → og:image
 				var candidates = [];
-				if (iconInfo)     candidates.push({url: iconInfo.url,    needsResize: iconInfo.needsResize});
-				if (appleIconUrl) candidates.push({url: appleIconUrl,    needsResize: true});
-				if (ogImageResUrl)candidates.push({url: ogImageResUrl,   needsResize: true});
+				if (iconInfo)      candidates.push({url: iconInfo.url,   needsResize: iconInfo.needsResize});
+				if (appleIconUrl)  candidates.push({url: appleIconUrl,   needsResize: true});
+				if (pngFaviconUrl) candidates.push({url: pngFaviconUrl,  needsResize: true});
+				if (ogImageResUrl) candidates.push({url: ogImageResUrl,  needsResize: true});
 
 				tryIconCandidates(candidates, 0, appName);
 			});
 		} else {
 			var candidates = [];
-			if (appleIconUrl) candidates.push({url: appleIconUrl,  needsResize: true});
-			if (ogImageResUrl)candidates.push({url: ogImageResUrl, needsResize: true});
+			if (appleIconUrl)  candidates.push({url: appleIconUrl,  needsResize: true});
+			if (pngFaviconUrl) candidates.push({url: pngFaviconUrl, needsResize: true});
+			if (ogImageResUrl) candidates.push({url: ogImageResUrl, needsResize: true});
 
 			tryIconCandidates(candidates, 0, title);
 		}
