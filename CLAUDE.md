@@ -3,7 +3,7 @@
 ## Platform
 
 - webOS legacy (Enyo 1.0, ES5 only, ancient Node.js in services)
-- Build: `node build.js` → produces `org.webosarchive.pwainstaller_1.0.0_all.ipk`
+- Build: `node build.js` → produces `org.webosarchive.pwainstaller_1.1.0_all.ipk`
 - Install to device: use the webOS SDK tools or device UI
 
 ## Debugging on Device
@@ -68,7 +68,7 @@ Files created by `curl -o` are 0600 (root-only). `addLaunchPoint` runs as a diff
 ## Building & SDK
 
 ```bash
-node build.js    # build → org.webosarchive.pwainstaller_1.0.0_all.ipk
+node build.js    # build → org.webosarchive.pwainstaller_1.1.0_all.ipk
 ```
 
 Palm SDK CLI tools: `/opt/PalmSDK/Current/bin/` (`palm-package`, `palm-install`, `palm-launch`, `palm-log`)

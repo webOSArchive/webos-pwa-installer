@@ -81,11 +81,11 @@ enyo.kind({
 						onChange: "browserChanged",
 						items: [
 							{caption: $L("webOS Browser"),        value: "com.palm.app.browser"},
-							{caption: $L("QupZilla 2.3 or higher"), value: "com.nizovn.qupzilla"}
+							{caption: $L("QupZilla 2.3 or higher"), value: "com.nizovn.qupzilla"},
+							{caption: $L("Atlas"),                  value: "org.webosports.app.atlas"}
 						]}
 				]},
-				{name: "qupzillaNote", showing: false,
-					content: $L("QupZilla must be installed separately."),
+				{name: "browserNote", showing: false,
 					className: "app-body-text", style: "text-align: center;"}
 			]}
 		]},
@@ -154,13 +154,17 @@ enyo.kind({
 		this.settings = this.loadSettings();
 		this.settings.browserId = "com.palm.app.browser";
 		this.$.browserSelector.setValue(this.settings.browserId);
-		this.$.qupzillaNote.setShowing(false);
+		this.$.browserNote.setShowing(false);
 		this.$.getAppPath.call({appId: "org.webosarchive.pwainstaller"});
 	},
 
 	onGetAppPathSuccess: function(inSender, inResponse) {
 		if (inResponse.basePath) {
-			this.appBasePath = inResponse.basePath;
+			// basePath points at index.html (e.g. file:///.../index.html);
+			// keep only the directory, as a plain path for addLaunchPoint
+			this.appBasePath = inResponse.basePath
+				.replace(/^file:\/\//, "")
+				.replace(/[^\/]*$/, "");
 		}
 	},
 
@@ -316,7 +320,12 @@ enyo.kind({
 	browserChanged: function(inSender, inNewValue) {
 		this.settings.browserId = inNewValue;
 		this.saveSettings();
-		this.$.qupzillaNote.setShowing(inNewValue === "com.nizovn.qupzilla");
+		var notes = {
+			"com.nizovn.qupzilla":      $L("QupZilla must be installed separately."),
+			"org.webosports.app.atlas": $L("Atlas must be installed separately.")
+		};
+		this.$.browserNote.setContent(notes[inNewValue] || "");
+		this.$.browserNote.setShowing(!!notes[inNewValue]);
 	},
 
 	loadSettings: function() {

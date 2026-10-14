@@ -56,7 +56,7 @@ node build.js         # build only
 node build.js install # build and install (requires device connected via USB)
 ```
 
-Output: `org.webosarchive.pwainstaller_1.0.0_all.ipk`
+Output: `org.webosarchive.pwainstaller_1.1.0_all.ipk`
 
 ## Browser Compatibility Notes
 
